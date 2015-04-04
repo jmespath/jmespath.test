@@ -132,7 +132,10 @@ class ComplianceTestRunner(object):
         process.stdin.flush()
         stdout, stderr = process.communicate()
         if 'result' in test_case:
-            actual = json.loads(stdout)
+            try:
+                actual = json.loads(stdout)
+            except:
+                actual = stdout
             expected = test_case['result']
             if not actual == expected:
                 self._show_failure(actual, test_case)
@@ -151,10 +154,12 @@ class ComplianceTestRunner(object):
     def _show_failure(self, actual, test_case):
         test_case['actual'] = json.dumps(actual)
         test_case['result'] = json.dumps(test_case['result'])
+        test_case['given_js'] = json.dumps(test_case['given'])
         failure_message = (
             "\nFAIL {category},{group_number},{test_number}\n"
             "The expression: {expression}\n"
             "was suppose to give: {result}\n"
+            "for the JSON: {given_js}\n"
             "but instead gave: {actual}\n"
         ).format(**test_case)
         sys.stdout.write(failure_message)
