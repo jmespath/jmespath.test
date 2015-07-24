@@ -125,9 +125,13 @@ class ComplianceTestRunner(object):
     def _run_test(self, test_case):
         command = shlex.split(self.jp_executable)
         command.append(test_case['expression'])
-        process = subprocess.Popen(command, stdout=subprocess.PIPE,
-                                   stderr=subprocess.PIPE,
-                                   stdin=subprocess.PIPE)
+        try:
+            process = subprocess.Popen(command, stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE,
+                                    stdin=subprocess.PIPE)
+        except Exception, e:
+            raise RuntimeError('Could not execute test executable "%s": '
+                               '%s' % (' '.join(command), e))
         process.stdin.write(json.dumps(test_case['given']))
         process.stdin.flush()
         stdout, stderr = process.communicate()
@@ -219,9 +223,15 @@ def main():
     if args.list:
         display_available_tests(runner.get_compliance_test_files())
     else:
-        runner.run_tests()
+        try:
+            runner.run_tests()
+        except Exception, e:
+            sys.stderr.write(str(e))
+            sys.stderr.write("\n")
+            return 1
     sys.stdout.write('\n')
+    return 0
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())
