@@ -74,7 +74,7 @@ class ComplianceTestRunner(object):
     TEST_DIR = _pjoin(_dname(_dname(_abs(__file__))), 'tests')
 
     def __init__(self, exe=None, tests=None, test_dir=TEST_DIR):
-        self.test_dir=  test_dir
+        self.test_dir = test_dir
         self.tests = tests
         self.jp_executable = exe
 
@@ -119,7 +119,8 @@ class ComplianceTestRunner(object):
         for test_json_file in self.get_compliance_test_files():
             test_groups = self._load_test_file(test_json_file)
             for i, test_group in enumerate(test_groups):
-                test_cases = self._load_test_cases(test_json_file, i, test_group)
+                test_cases = self._load_test_cases(test_json_file,
+                                                   i, test_group)
                 for test_case in test_cases:
                     yield test_case
 
@@ -128,8 +129,8 @@ class ComplianceTestRunner(object):
         command.append(test_case['expression'])
         try:
             process = subprocess.Popen(command, stdout=subprocess.PIPE,
-                                    stderr=subprocess.PIPE,
-                                    stdin=subprocess.PIPE)
+                                       stderr=subprocess.PIPE,
+                                       stdin=subprocess.PIPE)
         except Exception, e:
             raise RuntimeError('Could not execute test executable "%s": '
                                '%s' % (' '.join(command), e))
@@ -184,7 +185,7 @@ class ComplianceTestRunner(object):
         sys.stdout.write(failure_message)
 
     def get_compliance_test_files(self):
-        for root, dirnames, filenames in os.walk(self.test_dir):
+        for root, _, filenames in os.walk(self.test_dir):
             for filename in filenames:
                 if filename.endswith('.json'):
                     full_path = _pjoin(root, filename)
@@ -214,10 +215,9 @@ def test_spec(value):
 def main():
     parser = argparse.ArgumentParser(usage=__doc__)
     parser.add_argument('-e', '--exe', help='The JMESPath executable to use.')
-    parser.add_argument('-t', '--tests', help=('The compliance tests to run.  '
-                                              'If this value is not provided, '
-                                              'then all compliance tests are '
-                                              'run.'), type=test_spec, nargs='+')
+    parser.add_argument('-t', '--tests', help=(
+        'The compliance tests to run.  If this value is not provided, '
+        'then all compliance tests are run.'), type=test_spec, nargs='+')
     parser.add_argument('-l', '--list', action="store_true",
                         help=('List the available compliance tests to run.  '
                               'These values can then be used with the '
