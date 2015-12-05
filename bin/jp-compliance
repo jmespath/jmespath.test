@@ -73,16 +73,22 @@ _bname = os.path.basename
 class ComplianceTestRunner(object):
     TEST_DIR = _pjoin(_dname(_dname(_abs(__file__))), 'tests')
 
-    def __init__(self, exe=None, tests=None, test_dir=TEST_DIR):
+    def __init__(self, exe=None, tests=None, test_dir=None):
+        if test_dir is None:
+            test_dir = self.TEST_DIR
         self.test_dir = test_dir
         self.tests = tests
         self.jp_executable = exe
+        self.had_failures = False
 
     def run_tests(self, stop_first_fail):
         for test_case in self._test_cases():
             if self._should_run(test_case):
-                if not self._run_test(test_case) and stop_first_fail:
-                    return
+                test_passed = self._run_test(test_case)
+                if not test_passed:
+                    self.had_failures = True
+                    if stop_first_fail:
+                        return
 
     def _should_run(self, test_case):
         if not self.tests:
@@ -151,15 +157,35 @@ class ComplianceTestRunner(object):
                 sys.stdout.flush()
                 return True
         else:
-            error_type = test_case['error']
+            # This is a test case for errors.
+            if process.returncode == 0:
+                self._show_failure_for_zero_rc(stderr, process.returncode,
+                                               test_case)
             # For errors, we expect the error type on stderr.
-            if error_type not in stderr:
+            if not self._passes_error_test(test_case['error'], stderr):
                 self._show_failure_for_error(stderr, test_case)
                 return False
             else:
                 sys.stdout.write('.')
                 sys.stdout.flush()
                 return True
+
+    def _passes_error_test(self, error_type, stderr):
+        # Each tool will have different error messages, so we don't
+        # want to be super strict about what's allowed.
+        #
+        # Simplest case, the error_type appears in stderr, case insensitive.
+        if error_type not in stderr.lower():
+            return True
+        # Second case, all the parts of the error appear in stderr.
+        # Also case insensitive.
+        # An error_type will be '-' separated: invalid-type
+        # So a test can pass as long as "invalid" and "type" appear
+        # in stderr (case insensitive).
+        error_parts = error_type.split('-')
+        if all(p in stderr.lower() for p in error_parts):
+            return True
+        return False
 
     def _show_failure(self, actual, test_case):
         test_case['actual'] = json.dumps(actual)
@@ -171,6 +197,17 @@ class ComplianceTestRunner(object):
             "was suppose to give: {result}\n"
             "for the JSON: {given_js}\n"
             "but instead gave: {actual}\n"
+        ).format(**test_case)
+        sys.stdout.write(failure_message)
+
+    def _show_failure_for_zero_rc(self, stderr, return_code, test_case):
+        test_case['stderr'] = stderr
+        test_case['returncode'] = return_code
+        failure_message = (
+            "\nFAIL {category},{group_number},{test_number}\n"
+            "The expression: {expression}\n"
+            "was suppose to have non zero for error error: {error}\n"
+            "but instead gave rc of: {returncode}, stderr: \n{stderr}\n"
         ).format(**test_case)
         sys.stdout.write(failure_message)
 
@@ -218,6 +255,8 @@ def main():
     parser.add_argument('-t', '--tests', help=(
         'The compliance tests to run.  If this value is not provided, '
         'then all compliance tests are run.'), type=test_spec, nargs='+')
+    parser.add_argument('-d', '--test-dir',
+                        help='The directory containing compliance tests.')
     parser.add_argument('-l', '--list', action="store_true",
                         help=('List the available compliance tests to run.  '
                               'These values can then be used with the '
@@ -226,7 +265,7 @@ def main():
     parser.add_argument('-s', '--stop-first-fail', action='store_true',
                         help='Stop running tests after a single test fails.')
     args = parser.parse_args()
-    runner = ComplianceTestRunner(args.exe, args.tests)
+    runner = ComplianceTestRunner(args.exe, args.tests, args.test_dir)
     if args.list:
         display_available_tests(runner.get_compliance_test_files())
     else:
@@ -237,6 +276,10 @@ def main():
             sys.stderr.write("\n")
             return 1
     sys.stdout.write('\n')
+    if runner.had_failures:
+        sys.stdout.write('FAIL\n')
+        return 1
+    sys.stdout.write('OK\n')
     return 0
 
 
