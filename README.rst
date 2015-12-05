@@ -88,11 +88,28 @@ have the following interface:
 * Accept the input JSON data on stdin.
 * Accept the jmespath expression as an argument.
 * Print the jmespath result as JSON on stdout.
-* If an error occurred, it must write the error name to sys.stderr.  The error
-  name must be the first thing written to stderr, but it is free to write
-  information after the error name.  For example "syntax: Expression did not
-  compile 'foo.bar.'" would be a valid message to indicate that a syntax error
-  occurred because it starts with "syntax".
+* If an error occurred, it must write the error name to sys.stderr.  This
+  check is case insensitive.
+  The error types in the compliance tests are hyphenated, but each
+  individual component may appear in stderr (again case insensitive).
+
+Here are a few examples of error messages that would pass ``jp-compliance``:
+
+* Error type: ``unknown-function``
+* Valid error messages:
+
+  * ``unknown-function: somefunction()``
+  * ``error: unknown function 'somefunction()``
+  * ``Unknown function: somefunction()``
+
+* Error type: ``syntax``
+* Valid error messages:
+
+  * ``syntax: Unknown token '$'``
+  * ``syntax-error: Unknown token '$'``
+  * ``Syntax error: Unknown token '$'``
+  * ``An error occurred: Syntax error, unknown token '$'``
+
 
 .. note::
 
