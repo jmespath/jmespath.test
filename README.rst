@@ -30,11 +30,16 @@ Each JMESPath test case can have the following keys:
   against the ``given`` input.
 * ``error`` - The type of error that should be raised as a result of evaluating
   the JMESPath expression.
+* ``bench`` - If the case is a benchmark, ``bench`` contains the type of
+  benchmark. Available ``bench`` types are as follows:
+  * ``parse`` - Benchmark only the parsing of an expression.
+    ``interpret`` - Benchmark only the interpreting of an expression.
+    ``full`` - Benchmark both parsing and interepreting an expression.
 * ``comment`` - An optional comment containing a description of the specific
   test case.
 
-For each test case, either ``result`` or ``error`` must be specified.  Both
-keys cannot be present in a single test case.
+For each test case, either ``result``, ``error``, or ``bench`` must be
+specified.  Both keys cannot be present in a single test case.
 
 The error type (if the ``error`` key is present) indicates the type of error
 that an implementation should raise, but it does not indicate **when** this
