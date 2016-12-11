@@ -29,17 +29,25 @@ Each JMESPath test case can have the following keys:
 * ``result`` - The expected result from evaluating the JMESPath expression
   against the ``given`` input.
 * ``error`` - The type of error that should be raised as a result of evaluating
-  the JMESPath expression.
+  the JMESPath expression.  The valid values for an error are:
+
+  * ``syntax`` - Syntax error from an invalid JMESPath expression.
+  * ``invalid-arity`` - Wrong number of arguments passed to a function.
+  * ``invalid-type`` - Invalid argument type for a function.
+  * ``invalid-value`` - Semantically incorrect value (used in slice tests)
+  * ``unknown-function`` - Attempting to invoke an unknown function.
+
 * ``bench`` - If the case is a benchmark, ``bench`` contains the type of
   benchmark. Available ``bench`` types are as follows:
+
   * ``parse`` - Benchmark only the parsing of an expression.
-    ``interpret`` - Benchmark only the interpreting of an expression.
-    ``full`` - Benchmark both parsing and interepreting an expression.
+  *  ``interpret`` - Benchmark only the interpreting of an expression.
+  *  ``full`` - Benchmark both parsing and interepreting an expression.
 * ``comment`` - An optional comment containing a description of the specific
   test case.
 
 For each test case, either ``result``, ``error``, or ``bench`` must be
-specified.  Both keys cannot be present in a single test case.
+specified.  Only one of these keys can be present in a single test case.
 
 The error type (if the ``error`` key is present) indicates the type of error
 that an implementation should raise, but it does not indicate **when** this
