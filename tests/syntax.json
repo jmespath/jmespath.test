@@ -417,6 +417,16 @@
         "error": "syntax"
       },
       {
+        "comment": "Missing value",
+        "expression": "a.{foo:}",
+        "error": "syntax"
+      },
+      {
+        "comment": "Missing value with trailing comma",
+        "expression": "a.{foo: ,}",
+        "error": "syntax"
+      },
+      {
         "comment": "Valid multi-select hash extraction",
         "expression": "a.{foo: bar}",
         "result": null
