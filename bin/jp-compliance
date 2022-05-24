@@ -188,7 +188,7 @@ class ComplianceTestRunner(object):
         failure_message = (
             "\nFAIL {category},{group_number},{test_number}\n"
             "The expression: {expression}\n"
-            "was suppose to have a zero RC for test type 'bench',\n"
+            "was supposed to have a zero RC for test type 'bench',\n"
             "but instead gave rc of: {returncode}, stderr: \n{stderr}\n"
         ).format(**test_case)
         sys.stdout.write(failure_message)
@@ -217,7 +217,7 @@ class ComplianceTestRunner(object):
         failure_message = (
             "\nFAIL {category},{group_number},{test_number}\n"
             "The expression: {expression}\n"
-            "was suppose to give: {result}\n"
+            "was supposed to give: {result}\n"
             "for the JSON: {given_js}\n"
             "but instead gave: {actual}\n"
         ).format(**test_case)
@@ -229,7 +229,7 @@ class ComplianceTestRunner(object):
         failure_message = (
             "\nFAIL {category},{group_number},{test_number}\n"
             "The expression: {expression}\n"
-            "was suppose to have non zero for error error: {error}\n"
+            "was supposed to have non zero for error error: {error}\n"
             "but instead gave rc of: {returncode}, stderr: \n{stderr}\n"
         ).format(**test_case)
         sys.stdout.write(failure_message)
@@ -239,7 +239,7 @@ class ComplianceTestRunner(object):
         failure_message = (
             "\nFAIL {category},{group_number},{test_number}\n"
             "The expression: {expression}\n"
-            "was suppose to emit the error: {error}\n"
+            "was supposed to emit the error: {error}\n"
             "but instead gave: \n{stderr}\n"
         ).format(**test_case)
         sys.stdout.write(failure_message)
