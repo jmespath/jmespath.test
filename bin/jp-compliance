@@ -158,6 +158,16 @@ class ComplianceTestRunner(object):
                 sys.stdout.write('.')
                 sys.stdout.flush()
                 return True
+        elif 'bench' in test_case:
+            # Benchmark tests don't have an expected result right now, so we
+            # just ensure that we receieved a zero-rc.
+            if process.returncode == 0:
+                sys.stdout.write('.')
+                sys.stdout.flush()
+                return True
+            else:
+                self._show_bench_error(stderr, process.returncode, test_case)
+                return False
         else:
             # This is a test case for errors.
             if process.returncode == 0:
@@ -171,6 +181,17 @@ class ComplianceTestRunner(object):
                 sys.stdout.write('.')
                 sys.stdout.flush()
                 return True
+
+    def _show_bench_error(self, stderr, return_code, test_case):
+        test_case['stderr'] = stderr
+        test_case['returncode'] = return_code
+        failure_message = (
+            "\nFAIL {category},{group_number},{test_number}\n"
+            "The expression: {expression}\n"
+            "was suppose to have a zero RC for test type 'bench',\n"
+            "but instead gave rc of: {returncode}, stderr: \n{stderr}\n"
+        ).format(**test_case)
+        sys.stdout.write(failure_message)
 
     def _passes_error_test(self, error_type, stderr):
         # Each tool will have different error messages, so we don't
